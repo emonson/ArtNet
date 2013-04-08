@@ -15,12 +15,18 @@ def clean_up_text(orig):
 		# print 'body blanks', n
 
 	# Combine result number and artist name and add Artist field name
-	s,n = re.subn(r'\n(?:Full details\t\n)?([0-9]+)\t\n \t (.*)\n', r'\nArtist\t\g<2>\t\g<1>\n', s)
+	s,n = re.subn(r'\n(?:Full details\t\n)?([0-9]+)\t\n \t ?(.*)\n', r'\nArtist\t\g<2>\t\g<1>\n', s)
+	# print 'artist field', n
+
+	# Try first line, Combine result number and artist name and add Artist field name
+	s,n = re.subn(r'^(?:Full details\t\n)?([0-9]+)\t\n \t ?(.*)\n', r'\nArtist\t\g<2>\t\g<1>\n', s)
 	# print 'artist field', n
 
 	# Concatenate continued lines (which don't contain tabs) and replace newline with space:
-	s,n = re.subn(r'\n([^\t]*)\n', r' \g<1>\n', s)
-	# print 'continued lines', n
+	n = 1
+	while n > 0:
+		s,n = re.subn(r'\n([^\t]*)\n', r' \g<1>\n', s)
+		# print 'continued lines', n
 	
 	# Get rid of first blank line(s)
 	n = 1
@@ -98,14 +104,14 @@ else:
 
 	columns = {}
 	fields = ['Artist','Title','Description','Medium','Year of Work','Printing/Casting',
-					  'Size','Edition','Misc.','Sale of','Estimate','Sold For']
+					  'Size','Edition','Cat. Rais.','Found./Pub.','Misc.','Sale of','Estimate','Sold For',
+					  'Provenance','Exhibition','Literature']
 	for field in fields:
 		columns[field] = []
 	
 	lines = s.split('\n')
 	n_lines = len(lines)
 	
-	ii = 0
 	data = {}
 	
 	for ii in range(n_lines):
@@ -128,10 +134,17 @@ else:
 			data = {}
 		
 		if k not in columns:
-			sys.exit('field ' + k + ' not in data columns!')
+			sys.exit('Unexpected field "' + k + '" found but not in specified data columns!')
 		
-		data[k] = v
+		data[k] = v.strip()
 	
+	# record last data item in columns
+	for field in fields:
+		if field in data:
+			columns[field].append(data[field])
+		else:
+			columns[field].append('')
+
 	# check whether all fields have same length
 	lens = [len(v) for k,v in columns.iteritems()]
 	for l in lens:
