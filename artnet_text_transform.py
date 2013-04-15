@@ -6,6 +6,9 @@ import codecs
 
 def clean_up_text(orig):
 	
+	# Note: The while loops are here because some of these routines
+	#   need multiple passes through the text to catch all of the instances
+	
 	s = orig
 	
 	# Get rid of body blank lines
@@ -41,7 +44,8 @@ def clean_up_text(orig):
 
 	return s
 
-# Main body
+# --------------------------
+# Main body of the script
 if len(sys.argv) < 2:
 	sys.exit('\nUsage: python %s artnet_output.txt\nor\npython %s dir_of_artnet_txt_files\n' % (sys.argv[0], sys.argv[0]))
 
